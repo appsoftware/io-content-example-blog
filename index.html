@@ -49,45 +49,45 @@
 	<script src="bower_components/angular/angular.min.js"></script>
 	<script src="bower_components/angular-route/angular-route.min.js"></script>
 	<script src="bower_components/angular-touch/angular-touch.min.js"></script>
-
-	<!-- i/o content api -->
-
+	
 	<!-- angular app -->
 
 	<script>
 
+		// ToDo: 
+		
+		// Routing will allow each blog article to be navigable by
+		// content key or similar.
+		
+		// Need mechanism for paging blog list for extremely long lists
+
 		(function () {
 
 			'use strict';
-			angular.module('appMain', [
-
-						// Angular core
-
-						'ng',
-						'ngRoute',
-						'ngTouch'
-			]
-				)
-				.config(['$httpProvider', function ($httpProvider) {
-
-					// Configure modification for $http to fix
-					// issue in IE where JSON responses to get requests
-					// are cached.
-
-					// Initialize get if not there
-
-					if (!$httpProvider.defaults.headers.get) {
-
-						$httpProvider.defaults.headers.get = {};
-					}
-
-					// http://stackoverflow.com/questions/16098430/angular-ie-caching-issue-for-http
-
-					// Disable IE ajax request caching
-
-					$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
-					$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
-				}]);
+			
+			angular
+			
+			.module('appMain', ['ng', 'ngRoute', 'ngTouch'])
+			.config(['$httpProvider', function ($httpProvider) {
+	
+				// Configure modification for $http to fix
+				// issue in IE where JSON responses to get requests
+				// are cached.
+	
+				// Initialize get if not there
+	
+				if (!$httpProvider.defaults.headers.get) {
+	
+					$httpProvider.defaults.headers.get = {};
+				}
+	
+				// http://stackoverflow.com/questions/16098430/angular-ie-caching-issue-for-http
+	
+				// Disable IE ajax request caching
+	
+				$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
+				$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+			}]);
 		})();
 
 		(function () {
@@ -144,6 +144,9 @@
 								
 								$scope.$apply();
 							}
+							
+							// Since we are simply pulling all articles, no query string needed 
+							// here, just empty string
 							
 							var query = '';
 
