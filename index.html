@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="appMain">
+<head>
+	
+	<link rel="stylesheet" type="text/css" href="/bower_components/github-markdown-css/github-markdown.css" />
+
+	<title>Simple Blog</title>
+
+
+</head>
+<body class="markdown-body">
+
+	<p>Test</p>
+
+	<div ng-controller="blogController">
+		
+		<div id="bread-crumb-current">
+
+		</div>
+
+		<div id="cms-content-place-holder">
+
+		</div>
+	</div>
+
+	<script src="/bower_components/io-content-js/dist/io-content.js"></script>
+
+	<script src="/bower_components/angular/angular.min.js"></script>
+	<script src="/bower_components/angular-route/angular-route.min.js"></script>
+	<script src="/bower_components/angular-touch/angular-touch.min.js"></script>
+
+	<!-- i/o content api -->
+
+	<script>
+
+		function ContentClient() {
+
+			// Detect IE
+
+			var ie = (function () {
+
+				var undef,
+					v = 3,
+					div = document.createElement('div'),
+					all = div.getElementsByTagName('i');
+
+				while (
+
+					div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+					all[0]
+				);
+
+				return v > 4 ? v : undef;
+
+			}());
+
+			function endsWithChar(input, c) {
+
+				return input != null ? input.indexOf(c, input.length - 1) !== -1 : false;
+			};
+
+			// Cross browser send cross domain request
+
+			var sendRequest = function (url, contentClientBaseParameters, callback, postData) {
+
+				if (ie < 10) {
+
+					// IE 8/ 9 supports cross domain requests, but only
+					// via the XDomainRequest object. XDomainRequest does not support custom
+					// headers, so all base params are appened to qs
+
+					if (!endsWithChar(url, '&')) {
+
+						url += '&';
+					}
+
+					url = url + 'apiVersion=v' + contentClientBaseParameters.apiVersion + '&subAccountKey=' + contentClientBaseParameters.subAccountKey + '&contentType=' + contentClientBaseParameters.contentType;
+
+					var xdr = new XDomainRequest();
+					xdr.open("GET", url);
+
+					xdr.onprogress = function () { };
+					xdr.ontimeout = function () { };
+					xdr.onerror = function () { };
+					xdr.onload = function () {
+						callback(xdr.responseText);
+					}
+
+					setTimeout(function () {
+
+						xdr.send();
+
+					}, 0);
+
+				}
+				else {
+
+					var xhr = createXmlHttpObject();
+
+					if (!xhr) return;
+
+					var method = "GET";
+
+					xhr.open(method, url, true);
+
+					xhr.setRequestHeader('Api-Version', contentClientBaseParameters.apiVersion);
+					xhr.setRequestHeader('Api-Sub-Account-Key', contentClientBaseParameters.subAccountKey);
+					xhr.setRequestHeader('Api-Content-Type', contentClientBaseParameters.contentType);
+
+					xhr.onreadystatechange = function () {
+
+						if (xhr.readyState != 4) return;
+						if (xhr.status != 200 && xhr.status != 304) {
+
+							return;
+						}
+
+						callback(xhr.response);
+					}
+
+					if (xhr.readyState == 4) return;
+
+					xhr.send(postData);
+				}
+			}
+
+			var xmlHttpFactories = [
+
+				function () { return new XMLHttpRequest(); },
+				function () { return new ActiveXObject("Msxml2.XMLHTTP"); },
+				function () { return new ActiveXObject("Msxml3.XMLHTTP"); },
+				function () { return new ActiveXObject("Microsoft.XMLHTTP"); }
+			];
+
+			var createXmlHttpObject = function () {
+
+				var xmlhttp = false;
+
+				for (var i = 0; i < xmlHttpFactories.length; i++) {
+
+					try {
+
+						xmlhttp = xmlHttpFactories[i]();
+					}
+					catch (e) {
+
+						continue;
+					}
+
+					break;
+				}
+
+				return xmlhttp;
+			}
+
+			this.contentClientBaseParameters = {
+
+				apiVersion: '1.0',
+				apiEndPoint: 'http://api.iocontent.com',
+				subAccountKey: null
+			};
+
+			this.get = function (query, callback) {
+
+				// Check api endpoint format before creating complete url
+
+				if (!endsWithChar(this.contentClientBaseParameters.apiEndPoint, '/')) {
+					this.contentClientBaseParameters.apiEndPoint += '/';
+				}
+
+				var url = this.contentClientBaseParameters.apiEndPoint + 'content?' + query;
+
+				sendRequest(url, this.contentClientBaseParameters, callback);
+			}
+		};
+
+	</script>
+
+	<!-- angular app -->
+
+	<script>
+
+		(function () {
+
+			'use strict';
+			angular.module('appMain', [
+
+						// Angular core
+
+						'ng',
+						'ngRoute',
+						'ngTouch'
+			]
+				)
+				.config(['$httpProvider', function ($httpProvider) {
+
+					// Configure modification for $http to fix
+					// issue in IE where JSON responses to get requests
+					// are cached.
+
+					// Initialize get if not there
+
+					if (!$httpProvider.defaults.headers.get) {
+
+						$httpProvider.defaults.headers.get = {};
+					}
+
+					// http://stackoverflow.com/questions/16098430/angular-ie-caching-issue-for-http
+
+					// Disable IE ajax request caching
+
+					$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
+					$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+				}]);
+		})();
+
+		(function () {
+
+			'use strict';
+
+			angular.module('appMain')
+
+				.controller('blogController', ['$scope', function ($scope) {
+
+					$scope.blog = {
+
+						loadBlog: function (pageNo) {
+
+							console.log('test 1')
+							var apiCallBack = function (responseJson) {
+
+								var responseObj = JSON.parse(responseJson);
+
+								// In JS api, an array of content objects is always returned, even
+								// where the query would always limit the result set to a single content entity
+
+								document.getElementById('cms-content-place-holder').innerHTML = responseObj[0].content;
+								document.getElementById('bread-crumb-current').innerHTML = responseObj[0].title;
+								document.title = responseObj[0].title;
+							}
+
+							var contentClient = new ContentClient();
+
+							contentClient.contentClientBaseParameters.subAccountKey = 'nl7bwlc4txh2uvw3s6h4gcclgb';
+							contentClient.contentClientBaseParameters.contentType = 'blog-article';
+
+							var query = 'markdownToHtml=true&test';
+
+							contentClient.get(query, apiCallBack);
+						}
+					}
+
+					$scope.blog.loadBlog(1);
+				}]);
+
+		})();
+
+
+	</script>
+</body>
