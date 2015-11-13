@@ -17,17 +17,32 @@
 		
 		<div class="grid">
 			
+			<div class="unit whole">
+	
+				<div>
+					<img src="https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?max-height=80" alt="logo" />
+				</div>
+				
+			</div>
+		</div>
+
+
+		<div class="grid">
+			
 			<div class="unit three-quarters">
 	
-				<h1>Blog</h1>
-	
-				<div id="bread-crumb-current"></div>
+				<div><span><a href="index.html">Home</a></span> <span>/</span> <span id="bread-crumb-current"></span></div> 
+				
+				<h1 id="title-header"></h1>
+			
+				<p>Published: <span id="publish-date"></span></p>
+
 				<div id="cms-content-place-holder"></div>
 				
 			</div>
 			<div class="unit one-quarter">
 
-				<h1>Side Bar</h1>
+				<strong>Recent articles</strong>
 				
 				<ul>
 					<li ng-repeat="contentEntry in blog.contentEntryList">
@@ -119,9 +134,12 @@
 								// In JS api, an array of content objects is always returned, even
 								// where the query would always limit the result set to a single content entity
 
-								document.getElementById('cms-content-place-holder').innerHTML = responseObj[0].content;
-								document.getElementById('bread-crumb-current').innerHTML = responseObj[0].title;
 								document.title = responseObj[0].title;
+
+								document.getElementById('bread-crumb-current').innerHTML = responseObj[0].title;
+								document.getElementById('title-header').innerHTML = responseObj[0].title;
+								document.getElementById('publish-date').innerHTML = responseObj[0].publicPublishDate;
+								document.getElementById('cms-content-place-holder').innerHTML = responseObj[0].content;
 							}
 							
 							var query = 'key.equals=' + contentKey + '&markdownToHtml=true';
@@ -145,10 +163,10 @@
 								$scope.$apply();
 							}
 							
-							// Since we are simply pulling all articles, no query string needed 
-							// here, just empty string
+							// Since we are simply pulling all articles, only need to specify
+							// order
 							
-							var query = '';
+							var query = 'orderByDescending=publicPublishDate&limit=20';
 
 							contentClient.get(query, apiCallBack);
 						}
