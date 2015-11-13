@@ -53,6 +53,9 @@
 				
 				<ul>
 					<li ng-repeat="contentEntry in blog.contentEntryList">
+						
+						<!-- Link click will not refresh the page, but content is loaded and URL is updated -->
+						
 						<a href="index.html?key={{contentEntry.key}}" ng-click="blog.loadSingleBlogEntry(contentEntry.key)" class="link">{{contentEntry.title}}</a> 
 					</li>
 				</ul>
@@ -75,13 +78,6 @@
 	<!-- angular app -->
 
 	<script>
-
-		// ToDo: 
-		
-		// Routing will allow each blog article to be navigable by
-		// content key or similar.
-		
-		// Need mechanism for paging blog list for extremely long lists
 
 		(function () {
 
