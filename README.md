@@ -1,6 +1,6 @@
 # I/O Content Example Blog
 
-## A simple HTML, JS and CSS blog backed by [icontent.com](http://www.icontent.com)
+## A simple HTML, JS and CSS blog backed by [I/O Content](http://www.icontent.com) API driven CMS
 
 This simple blog is an example of how [I/O Content](http://www.icontent.com) can be used to manage content for websites. You can also use this example to run your blog using content in your I/O Content account.
 
