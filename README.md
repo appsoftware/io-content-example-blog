@@ -28,6 +28,8 @@ The dependencies for this example are:
 
 Note that I/O Content is queried via REST API, and [io-content-js](https://github.com/appsoftware/io-content-js) assists with making cross domain requests compatible with all major browsers.
 
+### API Query
+
 The core content fetch code is as follows:
 
 **1. Set up the content client**
@@ -62,4 +64,16 @@ var query = 'orderByDescending=publicPublishDate&limit=20';
 
 contentClient.get(query, apiCallBack);
 
+```
+
+### Content Assets
+
+Content Assets managed in I/O Content are loaded from our CDN using plain HTTPS urls. Where requesting images, our CDN offers 'on the fly' image resizing, specified here using the `?max-height=80` query string argument. Resized images are cached in the CDN for fast load times.
+
+Other file types are also served over the CDN in the same manner.
+
+```
+<div>
+	<img src="https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?max-height=80" alt="logo" />
+</div>
 ```
