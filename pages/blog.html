@@ -1,0 +1,30 @@
+
+
+
+		<div class="grid">
+			
+			<div class="unit three-quarters">
+	
+				<div><span><a href="index.html">Home</a></span> <span>/</span> <span id="bread-crumb-current"></span></div> 
+				
+				<h1 id="title-header"></h1>
+			
+				<p>Published: <span id="publish-date"></span></p>
+
+				<div id="cms-content-place-holder"></div>
+				
+			</div>
+			<div class="unit one-quarter">
+
+				<strong>Recent articles</strong>
+				
+				<ul>
+					<li ng-repeat="contentEntry in blog.contentEntryList">
+						<a href="#" class="link" ng-click="blog.loadSingleBlogEntry(contentEntry.key)">{{contentEntry.title}}</a> 
+					</li>
+				</ul>
+				
+			</div>
+	
+			
+		</div>

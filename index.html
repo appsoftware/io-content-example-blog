@@ -7,8 +7,11 @@
 	<link rel="stylesheet" type="text/css" href="bower_components/gridism/gridism.css" />
 	<link rel="stylesheet" type="text/css" href="bower_components/github-markdown-css/github-markdown.css" />
 
-	<title>Simple Blog</title>
+	<!-- Base href needed for AngularJs $locationProvider.html5Mode -->
 
+	<base href="/" />
+
+	<title></title>
 
 </head>
 <body class="markdown-body">
@@ -22,7 +25,11 @@
 				<div>
 					<img src="https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?max-height=80" alt="logo" />
 				</div>
-				
+				<div>
+					<hr />
+					<p>A simple HTML, JS and CSS blog example running on I/O Content CMS API</p>
+					<hr />
+				</div>
 			</div>
 		</div>
 
@@ -31,7 +38,7 @@
 			
 			<div class="unit three-quarters">
 	
-				<div><span><a href="index.html">Home</a></span> <span>/</span> <span id="bread-crumb-current"></span></div> 
+				<div><strong><a href="index.html">Home</a></strong> <span>/</span> <strong id="bread-crumb-current"></strong></div> 
 				
 				<h1 id="title-header"></h1>
 			
@@ -46,7 +53,7 @@
 				
 				<ul>
 					<li ng-repeat="contentEntry in blog.contentEntryList">
-						<a href="#" class="link" ng-click="blog.loadSingleBlogEntry(contentEntry.key)">{{contentEntry.title}}</a> 
+						<a href="index.html?key={{contentEntry.key}}" ng-click="blog.loadSingleBlogEntry(contentEntry.key)" class="link">{{contentEntry.title}}</a> 
 					</li>
 				</ul>
 				
@@ -83,25 +90,11 @@
 			angular
 			
 			.module('appMain', ['ng', 'ngRoute', 'ngTouch'])
-			.config(['$httpProvider', function ($httpProvider) {
+			.config(['$locationProvider', function ($locationProvider) {
 	
-				// Configure modification for $http to fix
-				// issue in IE where JSON responses to get requests
-				// are cached.
+				// html5Mode required for querystring parameter search ($location)
 	
-				// Initialize get if not there
-	
-				if (!$httpProvider.defaults.headers.get) {
-	
-					$httpProvider.defaults.headers.get = {};
-				}
-	
-				// http://stackoverflow.com/questions/16098430/angular-ie-caching-issue-for-http
-	
-				// Disable IE ajax request caching
-	
-				$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
-				$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+				$locationProvider.html5Mode(true);
 			}]);
 		})();
 
@@ -111,7 +104,14 @@
 
 			angular.module('appMain')
 
-				.controller('blogController', ['$scope', function ($scope) {
+				.controller('blogController', ['$scope', '$location', function ($scope, $location) {
+					
+					// Simple routing mechanism using Angulars location service
+					
+					var contentKey = $location.search().key; 
+
+					// Set up I/O Content ContentClient and configure sub account and 
+					// content type.
 
 					var contentClient = new ContentClient();
 
@@ -120,10 +120,11 @@
 
 					$scope.blog = {
 
-
 						contentEntryList: [],
 						
 						loadSingleBlogEntry: function (contentKey) {
+
+							console.log('load')
 
 							// Load full content for a single blog article
 
@@ -154,17 +155,17 @@
 							
 							var apiCallBack = function (responseJson) {
 
-								console.log(responseJson)
-
 								blog.contentEntryList = JSON.parse(responseJson); // [] of content entries
 								
-								$scope.blog.loadSingleBlogEntry(blog.contentEntryList[0].key);
+								var loadKey = contentKey != null ? contentKey : blog.contentEntryList[0].key;
+								
+								$scope.blog.loadSingleBlogEntry(loadKey);
 								
 								$scope.$apply();
 							}
 							
-							// Since we are simply pulling all articles, only need to specify
-							// order
+							// Since we are simply pulling all articles for purpose of creating side nav, 
+							// only need to specify.
 							
 							var query = 'orderByDescending=publicPublishDate&limit=20';
 
