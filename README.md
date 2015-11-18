@@ -28,6 +28,8 @@ The dependencies for this example are:
 
 Note that I/O Content is queried via REST API, and [io-content-js](https://github.com/appsoftware/io-content-js) assists with making cross domain requests compatible with all major browsers.
 
+AngularJS routing and templating is intentionally avoided to keep the file structure of this example as basic as possible. If you would like an example using AngularJS routing and disquss comments, our official blog is [also available on GitHub](https://github.com/appsoftware/io-content-blog).
+
 ### API Query
 
 The core content fetch code is as follows:
