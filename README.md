@@ -36,46 +36,53 @@ The core content fetch code is as follows:
 
 **1. Set up the content client**
 
-```
-var contentClient = new ContentClient();
 
-contentClient.contentClientBaseParameters.subAccountKey = 'nl7bwlc4txh2uvw3s6h4gcclgb';
-contentClient.contentClientBaseParameters.contentType = 'blog-article';
-```
+	var contentClient = new ContentClient();
+	
+	contentClient.contentClientBaseParameters.subAccountKey = 'nl7bwlc4txh2uvw3s6h4gcclgb';
+	contentClient.contentClientBaseParameters.contentType = 'blog-article';
+
 
 **2. Request a list of content entries and load the first into view**
 
-```
-var blog = this;
-							
-var apiCallBack = function (responseJson) {
 
-	blog.contentEntryList = JSON.parse(responseJson); // [] of content entries
+	// Load a list of blog articles to allow user to navigate
+								
+	var blog = this;
 	
-	var loadKey = contentKey != null ? contentKey : blog.contentEntryList[0].key;
+	var apiCallBack = function (responseJson) {
 	
-	$scope.blog.loadSingleBlogEntry(loadKey);
+		var contentApiResponse = JSON.parse(responseJson); // [] of content entries
+		
+		blog.articleNavList = contentApiResponse.data;
+		
+		var loadKey = contentKey != null ? contentKey : blog.articleNavList[0].key;
+		
+		$scope.blog.loadSingleBlogArticle(loadKey);
+		
+		$scope.$apply();
+	}
 	
-	$scope.$apply();
-}
+	// Query specifies get content entries in descending order (by custom publicPublishDate field)
+	// limit to the 20 most recent entries, and restrict the properties (select) to key and title, as
+	// we don't need the full content entry for a navigation list
+	
+	var query = 'orderByDescending=publicPublishDate&pageNumber=1&pageSize=20&select=key+title';
+	
+	contentClient.get(query, apiCallBack);
 
-// Since we are simply pulling all articles for purpose of creating side nav, 
-// only need to specify.
-
-var query = 'orderByDescending=publicPublishDate&limit=20';
-
-contentClient.get(query, apiCallBack);
-
-```
 
 ### Content Assets
 
-Content Assets managed in I/O Content are loaded from our CDN using plain HTTPS urls. Where requesting images, our CDN offers 'on the fly' image resizing, specified here using the `?max-height=80` query string argument. Resized images are cached in the CDN for fast load times.
+Content Assets managed in I/O Content are loaded from our CDN using plain HTTPS urls. Where requesting images, our CDN offers 'on the fly' image resizing, specified here using the `?maxHeight=80` query string argument. Resized images are cached in the CDN for fast load times.
 
 Other file types are also served over the CDN in the same manner.
 
-```
-<div>
-	<img src="https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?max-height=80" alt="logo" />
-</div>
-```
+
+	<div>
+		<img src="https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?maxHeight=80" alt="logo" />
+	</div>
+
+Which retrieves the following image:
+
+![io content logo](https://cdn.iocontent.com/api/v1.0/assets/nfm6dwvsmrd6uukgj3rzdugerc/20151113-091052578/tcm1/iocontent-blocks-logo-335-x-1149.png?maxHeight=80)
