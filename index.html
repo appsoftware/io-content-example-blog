@@ -7,10 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="bower_components/gridism/gridism.css" />
 	<link rel="stylesheet" type="text/css" href="bower_components/github-markdown-css/github-markdown.css" />
 
-	<!-- Base href needed for AngularJs $locationProvider.html5Mode -->
-
-	<base href="/" />
-
 	<title></title>
 
 </head>
@@ -52,11 +48,11 @@
 				<strong>Recent articles</strong>
 				
 				<ul>
-					<li ng-repeat="contentEntry in blog.contentEntryList">
+					<li ng-repeat="articleNav in blog.articleNavList">
 						
 						<!-- Link click will not refresh the page, but content is loaded and URL is updated -->
 						
-						<a href="index.html?key={{contentEntry.key}}" ng-click="blog.loadSingleBlogEntry(contentEntry.key)" class="link">{{contentEntry.title}}</a> 
+						<a href="index.html?key={{articleNav.key}}" ng-click="blog.loadSingleBlogEntry(articleNav.key)" class="link">{{articleNav.title}}</a> 
 					</li>
 				</ul>
 				
@@ -88,9 +84,7 @@
 			.module('appMain', ['ng', 'ngRoute', 'ngTouch'])
 			.config(['$locationProvider', function ($locationProvider) {
 	
-				// html5Mode required for querystring parameter search ($location)
-	
-				$locationProvider.html5Mode(true);
+
 			}]);
 		})();
 
@@ -102,7 +96,7 @@
 
 				.controller('blogController', ['$scope', '$location', function ($scope, $location) {
 					
-					// Simple routing mechanism using Angulars location service
+					// Simple parameter search mechanism using AngularJS location service
 					
 					var contentKey = $location.search().key; 
 
@@ -116,9 +110,9 @@
 
 					$scope.blog = {
 
-						contentEntryList: [],
+						articleNavList: null,
 						
-						loadSingleBlogEntry: function (contentKey) {
+						loadSingleBlogArticle: function (contentKey) {
 
 							console.log('load')
 
@@ -126,56 +120,63 @@
 
 							var apiCallBack = function (responseJson) {
 
-								var responseObj = JSON.parse(responseJson);
+								var contentResponse = JSON.parse(responseJson);
+
+								var blogArticle = contentResponse.data[0];
 
 								// In JS api, an array of content objects is always returned, even
 								// where the query would always limit the result set to a single content entity
 
-								document.title = responseObj[0].title;
+								document.title = blogArticle.title;
 
-								document.getElementById('bread-crumb-current').innerHTML = responseObj[0].title;
-								document.getElementById('title-header').innerHTML = responseObj[0].title;
-								document.getElementById('publish-date').innerHTML = responseObj[0].publicPublishDate;
-								document.getElementById('cms-content-place-holder').innerHTML = responseObj[0].content;
+								document.getElementById('bread-crumb-current').innerHTML = blogArticle.title;
+								document.getElementById('title-header').innerHTML = blogArticle.title;
+								document.getElementById('publish-date').innerHTML = blogArticle.publicPublishDate;
+								document.getElementById('cms-content-place-holder').innerHTML = blogArticle.content;
 							}
 							
 							var query = 'key.equals=' + contentKey + '&markdownToHtml=true';
 
 							contentClient.get(query, apiCallBack);
 						},
-						loadContentEntryList: function() {
+						loadArticleNavList: function() {
 							
-							// Load a list of blog artciles to allow user to navigate
+							// Load a list of blog articles to allow user to navigate
 							
 							var blog = this;
 							
 							var apiCallBack = function (responseJson) {
 
-								blog.contentEntryList = JSON.parse(responseJson); // [] of content entries
+								var contentApiResponse = JSON.parse(responseJson); // [] of content entries
 								
-								var loadKey = contentKey != null ? contentKey : blog.contentEntryList[0].key;
+								blog.articleNavList = contentApiResponse.data;
 								
-								$scope.blog.loadSingleBlogEntry(loadKey);
+								var loadKey = contentKey != null ? contentKey : blog.articleNavList[0].key;
+								
+								$scope.blog.loadSingleBlogArticle(loadKey);
 								
 								$scope.$apply();
 							}
 							
-							// Since we are simply pulling all articles for purpose of creating side nav, 
-							// only need to specify.
+							// Query specifies get content entries in descending order (by custom publicPublishDate field)
+							// limit to the 20 most recent entries, and restrict the properties (select) to key and title, as
+							// we don't need the full content entry for a navigation list
 							
-							var query = 'orderByDescending=publicPublishDate&limit=20';
+							var query = 'orderByDescending=publicPublishDate&pageNumber=1&pageSize=20&select=key+title';
 
 							contentClient.get(query, apiCallBack);
 						}
 					}
 
-					$scope.blog.loadContentEntryList();
+					$scope.blog.loadArticleNavList();
 				}]);
 
 		})();
 
 
 	</script>
+	
+	<!-- Fork me on GitHub -->
 	
 	<a href="https://github.com/appsoftware/io-content-example-blog"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
 	
