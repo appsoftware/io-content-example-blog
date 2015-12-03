@@ -23,11 +23,11 @@
     "tests"
   ],
   "dependencies": {
-    "io-content-js": "~1.1.2",
     "github-markdown-css": "~2.1.0",
     "angular": "~1.4.7",
     "angular-route": "~1.4.7",
     "angular-touch": "~1.4.7",
-    "gridism": "~0.2.1"
+    "gridism": "~0.2.1",
+    "io-content-js": "~1.2.1"
   }
 }
